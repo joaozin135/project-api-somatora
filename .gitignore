@@ -2,6 +2,9 @@
 /dist
 /node_modules
 /build
+.agents/
+prisma.config.ts
+skills-lock.json
 
 # Logs
 logs
@@ -54,3 +57,7 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+/generated/prisma
+
+/generated/prisma
