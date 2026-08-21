@@ -5,6 +5,7 @@
 .agents/
 prisma.config.ts
 skills-lock.json
+/src/generated
 
 # Logs
 logs
