@@ -21,7 +21,25 @@ model User {
   role      Role @default(USER)
 }
 
+model Receipt {
+  id        String @id @default(uuid())
+  type          ReceiptType
+  diameterClass DiameterClass
+  createdAt DateTime @default(now())
+}
+
 enum Role {
   USER
   ADMIN
+}
+
+enum ReceiptType{
+  PE
+  BICA
+}
+
+enum DiameterClass{
+  FROM_18_TO_24
+  FROM_24_TO_33
+  ABOVE_33
 }
