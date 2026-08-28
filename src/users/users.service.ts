@@ -75,4 +75,9 @@ export class UsersService {
       ...(passwordHash !== undefined && { password: passwordHash }),
     });
   }
+
+  async remove(id: string) {
+    await this.findOne(id);
+    return this.userRepository.remove(id);
+  }
 }

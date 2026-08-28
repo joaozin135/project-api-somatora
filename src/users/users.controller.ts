@@ -32,4 +32,9 @@ export class UserController {
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.usersService.remove(id);
+  }
 }
