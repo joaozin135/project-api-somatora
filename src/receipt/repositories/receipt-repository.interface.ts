@@ -11,9 +11,9 @@ export type Receipt = {
 };
 
 export interface IReceiptRepository {
-  // findById(id: string): Promise<Receipt | null>;
-  // findAll(): Promise<Receipt[]>;
+  findById(id: string): Promise<Receipt | null>;
+  findAll(): Promise<Receipt[]>;
   create(input: CreateReceiptsDTO): Promise<Receipt>;
-  // update(id: string, input: UpdateReceiptsDTO): Promise<Receipt>;
-  // remove(id: string): Promise<void>;
+  update(id: string, input: UpdateReceiptsDTO): Promise<Receipt>;
+  remove(id: string): Promise<void>;
 }
