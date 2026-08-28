@@ -1,4 +1,3 @@
-
 import {
   Body,
   Controller,
@@ -17,20 +16,20 @@ import { CreateUserDTO } from './dto/create-user.dto';
 
 @Controller('user')
 export class UserController {
-    constructor(private readonly usersService: UsersService) {}
-        
-        @Post()
-        create(@Body() createUserDTO: CreateUserDTO) {
-            return this.usersService.create(createUserDTO);
-        }         
+  constructor(private readonly usersService: UsersService) {}
 
-        @Get()
-        findAll(){
-            return this.usersService.findAll();
-        }
+  @Post()
+  create(@Body() createUserDTO: CreateUserDTO) {
+    return this.usersService.create(createUserDTO);
+  }
 
-        @ Get(':id')
-        findOne(@Param('id') id: string){
-            return this.usersService.findOne(id);
-        }
+  @Get()
+  findAll() {
+    return this.usersService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.usersService.findOne(id);
+  }
 }
