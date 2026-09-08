@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDTO } from '../dto/create-user.dto';
-import { UserPublic } from './user-repository.interface';
+import { UserPublic, UserWithPassword } from './user-repository.interface';
 import { UpdateUserDTO } from '../dto/update-user.dto';
 import { Role } from 'src/generated/prisma/enums';
 
@@ -18,7 +18,7 @@ export class UserRepository {
         role: input.role,
       },
     });
-    return this.toWithoutPasswordUser(created);
+    return this.toWithPasswordUser(created);
   }
 
   async findById(id: string): Promise<UserPublic | null> {
@@ -26,15 +26,15 @@ export class UserRepository {
       where: { id },
     });
     if (!row) return null;
-    return this.toWithoutPasswordUser(row);
+    return this.toWithPasswordUser(row);
   }
 
-  async findByEmail(email: string): Promise<UserPublic | null> {
+  async findByEmail(email: string): Promise<UserWithPassword | null> {
     const row = await this.prisma.user.findUnique({
       where: { email },
     });
     if (!row) return null;
-    return this.toWithoutPasswordUser(row);
+    return row;
   }
 
   async findAllWithoutPassword(): Promise<UserPublic[]> {
@@ -46,7 +46,7 @@ export class UserRepository {
         role: true,
       },
     });
-    return rows.map(this.toWithoutPasswordUser);
+    return rows.map(this.toWithPasswordUser);
   }
 
   async update(id: string, input: UpdateUserDTO): Promise<UserPublic> {
@@ -59,7 +59,7 @@ export class UserRepository {
         ...(input.role !== undefined && { role: input.role }),
       },
     });
-    return this.toWithoutPasswordUser(row);
+    return this.toWithPasswordUser(row);
   }
 
   async remove(id: string): Promise<void> {
@@ -68,7 +68,7 @@ export class UserRepository {
     });
   }
 
-  private toWithoutPasswordUser(row: {
+  private toWithPasswordUser(row: {
     id: string;
     name: string;
     email: string;

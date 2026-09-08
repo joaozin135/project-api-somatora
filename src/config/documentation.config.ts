@@ -6,6 +6,7 @@ export function setupDocumentationConfig(app: INestApplication){
         .setTitle('API Documentation')
         .setDescription('Documentation for the API')
         .setVersion('1.0')
+        .addBearerAuth()
         .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api/swagger/reference', app, document, {
