@@ -6,8 +6,19 @@ export const RECEIPT_REPOSITORY = Symbol('RECEIPT_REPOSITORY');
 
 export type Receipt = {
   id: string;
+  invoiceNumber: string;
+  supplier: string;
+  farm: string;
+  length: number;
   type: ReceiptType;
   diameterClass: DiameterClass;
+  truckPlate: string;
+  trailerPlate: string | null;
+  driver: string;
+  notes: string | null;
+  grossWeight: number;
+  tareWeight: number;
+  createdAt: Date;
 };
 
 export interface IReceiptRepository {

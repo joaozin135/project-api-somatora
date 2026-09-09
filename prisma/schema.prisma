@@ -22,10 +22,20 @@ model User {
 }
 
 model Receipt {
-  id        String @id @default(uuid())
+  id            String        @id @default(uuid())
+  invoiceNumber String
+  supplier      String
+  farm          String
+  length        Float
   type          ReceiptType
   diameterClass DiameterClass
-  createdAt DateTime @default(now())
+  truckPlate    String
+  trailerPlate  String?
+  driver        String
+  notes         String?
+  grossWeight   Float
+  tareWeight    Float
+  createdAt     DateTime      @default(now())
 }
 
 enum Role {
@@ -36,6 +46,7 @@ enum Role {
 enum ReceiptType{
   PE
   BICA
+  SEGUNDA_TORA
 }
 
 enum DiameterClass{
