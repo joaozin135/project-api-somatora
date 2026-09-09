@@ -4,6 +4,14 @@ import { UpdateReceiptsDTO } from '../dto/update-receipts.dto';
 
 export const RECEIPT_REPOSITORY = Symbol('RECEIPT_REPOSITORY');
 
+export type ComplementaryInvoiceSummary = {
+  id: string;
+  number: string;
+  supplier: string;
+  totalWeight: number;
+  issueDate: Date;
+};
+
 export type Receipt = {
   id: string;
   invoiceNumber: string;
@@ -18,11 +26,16 @@ export type Receipt = {
   notes: string | null;
   grossWeight: number;
   tareWeight: number;
+  invoiceWeight: number | null;
+  pricePerTon: number | null;
   createdAt: Date;
+  complementaryInvoiceId: string | null;
+  complementaryInvoice: ComplementaryInvoiceSummary | null;
 };
 
 export interface IReceiptRepository {
   findById(id: string): Promise<Receipt | null>;
+  findByIds(ids: string[]): Promise<Receipt[]>;
   findAll(): Promise<Receipt[]>;
   create(input: CreateReceiptsDTO): Promise<Receipt>;
   update(id: string, input: UpdateReceiptsDTO): Promise<Receipt>;

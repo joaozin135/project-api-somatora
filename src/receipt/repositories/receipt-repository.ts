@@ -3,6 +3,10 @@ import { PrismaService } from "src/prisma/prisma.service";
 import { CreateReceiptsDTO } from "../dto/create-receipts.dto";
 import { IReceiptRepository, Receipt } from "./receipt-repository.interface";
 
+const includeComplementaryInvoice = {
+    complementaryInvoice: true,
+} as const;
+
 @Injectable()
 export class ReceiptRepository implements IReceiptRepository {
     constructor(private readonly prisma: PrismaService) {}
@@ -22,13 +26,17 @@ export class ReceiptRepository implements IReceiptRepository {
                 notes: input.notes,
                 grossWeight: input.grossWeight,
                 tareWeight: input.tareWeight,
+                invoiceWeight: input.invoiceWeight,
+                pricePerTon: input.pricePerTon,
             },
+            include: includeComplementaryInvoice,
         });
         return created;
     }
 
     async findAll(): Promise<Receipt[]> {
         const rows = await this.prisma.receipt.findMany({
+            include: includeComplementaryInvoice,
             orderBy: { createdAt: "desc" },
         });
         return rows;
@@ -39,8 +47,19 @@ export class ReceiptRepository implements IReceiptRepository {
             where: {
                 id,
             },
+            include: includeComplementaryInvoice,
         });
         return row;
+    }
+
+    async findByIds(ids: string[]): Promise<Receipt[]> {
+        const rows = await this.prisma.receipt.findMany({
+            where: {
+                id: { in: ids },
+            },
+            include: includeComplementaryInvoice,
+        });
+        return rows;
     }
 
     async update(id: string, input: Partial<CreateReceiptsDTO>): Promise<Receipt> {
@@ -61,7 +80,10 @@ export class ReceiptRepository implements IReceiptRepository {
                 ...(input.notes !== undefined && { notes: input.notes }),
                 ...(input.grossWeight !== undefined && { grossWeight: input.grossWeight }),
                 ...(input.tareWeight !== undefined && { tareWeight: input.tareWeight }),
+                ...(input.invoiceWeight !== undefined && { invoiceWeight: input.invoiceWeight }),
+                ...(input.pricePerTon !== undefined && { pricePerTon: input.pricePerTon }),
             },
+            include: includeComplementaryInvoice,
         });
         return updated;
     }

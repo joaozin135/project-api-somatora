@@ -97,4 +97,20 @@ export class CreateReceiptsDTO {
         example: 15000
     })
     tareWeight!: number;
+
+    @IsNumber()
+    @IsPositive()
+    @ApiProperty({
+        description: 'Peso (tonelada) declarado na nota fiscal do fornecedor, em kg',
+        example: 30000
+    })
+    invoiceWeight!: number;
+
+    @IsNumber()
+    @IsPositive()
+    @ApiProperty({
+        description: 'Valor por tonelada informado na nota fiscal, em R$',
+        example: 250.5
+    })
+    pricePerTon!: number;
 }

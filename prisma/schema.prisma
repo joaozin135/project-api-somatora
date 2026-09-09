@@ -35,7 +35,22 @@ model Receipt {
   notes         String?
   grossWeight   Float
   tareWeight    Float
+  invoiceWeight Float?
+  pricePerTon   Float?
   createdAt     DateTime      @default(now())
+
+  complementaryInvoiceId String?
+  complementaryInvoice   ComplementaryInvoice? @relation(fields: [complementaryInvoiceId], references: [id])
+}
+
+model ComplementaryInvoice {
+  id          String   @id @default(uuid())
+  number      String
+  supplier    String
+  totalWeight Float
+  issueDate   DateTime @default(now())
+
+  receipts Receipt[]
 }
 
 enum Role {

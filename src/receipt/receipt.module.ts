@@ -15,5 +15,6 @@ import { PrismaModule } from 'src/prisma/prisma.module';
       useClass: ReceiptRepository,
     },
   ],
+  exports: [RECEIPT_REPOSITORY],
 })
 export class ReceiptModule {}
