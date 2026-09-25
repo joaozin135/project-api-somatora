@@ -21,6 +21,10 @@ export class ComplementaryInvoiceRepository
     return this.prisma.complementaryInvoice.findUnique({ where: { id } });
   }
 
+  async remove(id: string): Promise<void> {
+    await this.prisma.complementaryInvoice.delete({ where: { id } });
+  }
+
   async createAndLinkReceipts(input: {
     number: string;
     supplier: string;

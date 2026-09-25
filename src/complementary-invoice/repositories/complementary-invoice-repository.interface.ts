@@ -19,4 +19,5 @@ export interface IComplementaryInvoiceRepository {
     totalWeight: number;
     receiptIds: string[];
   }): Promise<ComplementaryInvoice>;
+  remove(id: string): Promise<void>;
 }

@@ -21,11 +21,39 @@ model User {
   role      Role @default(USER)
 }
 
+model Supplier {
+  id      String  @id @default(uuid())
+  name    String  @unique
+  active  Boolean @default(true)
+  cnpj    String?
+  address String?
+  phone   String?
+  email   String?
+
+  receipts Receipt[]
+  farms    Farm[]
+}
+
+model Farm {
+  id         String   @id @default(uuid())
+  name       String
+  supplierId String
+  supplier   Supplier @relation(fields: [supplierId], references: [id])
+
+  receipts Receipt[]
+
+  @@unique([supplierId, name])
+}
+
 model Receipt {
   id            String        @id @default(uuid())
   invoiceNumber String
   supplier      String
+  supplierId    String
+  supplierRef   Supplier      @relation(fields: [supplierId], references: [id])
   farm          String
+  farmId        String
+  farmRef       Farm          @relation(fields: [farmId], references: [id])
   length        Float
   type          ReceiptType
   diameterClass DiameterClass
@@ -35,6 +63,8 @@ model Receipt {
   notes         String?
   grossWeight   Float
   tareWeight    Float
+  trailerGrossWeight Float?
+  trailerTareWeight  Float?
   invoiceWeight Float?
   pricePerTon   Float?
   createdAt     DateTime      @default(now())

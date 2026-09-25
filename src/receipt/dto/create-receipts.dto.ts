@@ -14,18 +14,28 @@ export class CreateReceiptsDTO {
     @IsString()
     @IsNotEmpty()
     @ApiProperty({
-        description: 'Fornecedor',
-        example: 'Fazenda Santa Rita'
+        description: 'Id do fornecedor cadastrado',
+        example: 'b3f1c2a4-...'
     })
-    supplier!: string;
+    supplierId!: string;
 
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     @ApiProperty({
-        description: 'Fazenda de origem da madeira',
-        example: 'Fazenda Santa Rita'
+        description: 'Id de uma fazenda já cadastrada para o fornecedor. Informe este OU newFarmName.',
+        example: 'b3f1c2a4-...',
+        required: false
     })
-    farm!: string;
+    farmId?: string;
+
+    @IsString()
+    @IsOptional()
+    @ApiProperty({
+        description: 'Nome de uma fazenda nova, ainda não cadastrada para o fornecedor — será criada e vinculada automaticamente. Informe este OU farmId.',
+        example: 'Fazenda Santa Rita',
+        required: false
+    })
+    newFarmName?: string;
 
     @IsNumber()
     @IsPositive()
@@ -93,10 +103,30 @@ export class CreateReceiptsDTO {
     @IsNumber()
     @IsPositive()
     @ApiProperty({
-        description: 'Peso vazio (tara) em kg',
+        description: 'Peso vazio (tara) em kg — do cavalo, quando a julieta é pesada separadamente',
         example: 15000
     })
     tareWeight!: number;
+
+    @IsNumber()
+    @IsPositive()
+    @IsOptional()
+    @ApiProperty({
+        description: 'Peso bruto da julieta em kg, quando pesada separadamente do cavalo. Informe junto com trailerTareWeight.',
+        example: 18000,
+        required: false
+    })
+    trailerGrossWeight?: number;
+
+    @IsNumber()
+    @IsPositive()
+    @IsOptional()
+    @ApiProperty({
+        description: 'Peso vazio (tara) da julieta em kg, quando pesada separadamente do cavalo. Informe junto com trailerGrossWeight.',
+        example: 8000,
+        required: false
+    })
+    trailerTareWeight?: number;
 
     @IsNumber()
     @IsPositive()

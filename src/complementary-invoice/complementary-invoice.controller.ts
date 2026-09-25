@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { ComplementaryInvoiceService } from './complementary-invoice.service';
 import { CreateComplementaryInvoiceDTO } from './dto/create-complementary-invoice.dto';
 
@@ -16,5 +16,10 @@ export class ComplementaryInvoiceController {
   @Get()
   findAll() {
     return this.complementaryInvoiceService.findAll();
+  }
+
+  @Delete('receipt/:receiptId')
+  unlinkReceipt(@Param('receiptId') receiptId: string) {
+    return this.complementaryInvoiceService.unlinkReceipt(receiptId);
   }
 }

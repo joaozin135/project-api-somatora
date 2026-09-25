@@ -6,6 +6,8 @@ import { ConfigModule } from '@nestjs/config';
 import { ReceiptModule } from './receipt/receipt.module';
 import { AuthModule } from './auth/auth.module';
 import { ComplementaryInvoiceModule } from './complementary-invoice/complementary-invoice.module';
+import { SupplierModule } from './supplier/supplier.module';
+import { FarmModule } from './farm/farm.module';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { ComplementaryInvoiceModule } from './complementary-invoice/complementar
     ReceiptModule,
     AuthModule,
     ComplementaryInvoiceModule,
+    SupplierModule,
+    FarmModule,
   ],
   controllers: [AppController],
   providers: [AppService],

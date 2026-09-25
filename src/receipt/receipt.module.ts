@@ -4,9 +4,11 @@ import { ReceiptService } from './receipt.service';
 import { RECEIPT_REPOSITORY } from './repositories/receipt-repository.interface';
 import { ReceiptRepository } from './repositories/receipt-repository';
 import { PrismaModule } from 'src/prisma/prisma.module';
+import { SupplierModule } from 'src/supplier/supplier.module';
+import { FarmModule } from 'src/farm/farm.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, SupplierModule, FarmModule],
   controllers: [ReceiptController],
   providers: [
     ReceiptService,

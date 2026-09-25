@@ -1,7 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { CreateReceiptsDTO } from "../dto/create-receipts.dto";
-import { IReceiptRepository, Receipt } from "./receipt-repository.interface";
+import { CreateReceiptData, IReceiptRepository, Receipt, UpdateReceiptData } from "./receipt-repository.interface";
 
 const includeComplementaryInvoice = {
     complementaryInvoice: true,
@@ -11,12 +10,14 @@ const includeComplementaryInvoice = {
 export class ReceiptRepository implements IReceiptRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    async create(input: CreateReceiptsDTO): Promise<Receipt> {
+    async create(input: CreateReceiptData): Promise<Receipt> {
         const created = await this.prisma.receipt.create({
             data: {
                 invoiceNumber: input.invoiceNumber,
-                supplier: input.supplier,
-                farm: input.farm,
+                supplier: input.supplierName,
+                supplierId: input.supplierId,
+                farm: input.farmName,
+                farmId: input.farmId,
                 length: input.length,
                 type: input.type,
                 diameterClass: input.diameterClass,
@@ -26,6 +27,8 @@ export class ReceiptRepository implements IReceiptRepository {
                 notes: input.notes,
                 grossWeight: input.grossWeight,
                 tareWeight: input.tareWeight,
+                trailerGrossWeight: input.trailerGrossWeight,
+                trailerTareWeight: input.trailerTareWeight,
                 invoiceWeight: input.invoiceWeight,
                 pricePerTon: input.pricePerTon,
             },
@@ -62,15 +65,21 @@ export class ReceiptRepository implements IReceiptRepository {
         return rows;
     }
 
-    async update(id: string, input: Partial<CreateReceiptsDTO>): Promise<Receipt> {
+    async update(id: string, input: UpdateReceiptData): Promise<Receipt> {
         const updated = await this.prisma.receipt.update({
             where: {
                 id,
             },
             data: {
                 ...(input.invoiceNumber !== undefined && { invoiceNumber: input.invoiceNumber }),
-                ...(input.supplier !== undefined && { supplier: input.supplier }),
-                ...(input.farm !== undefined && { farm: input.farm }),
+                ...(input.supplierId !== undefined && {
+                    supplierId: input.supplierId,
+                    supplier: input.supplierName,
+                }),
+                ...(input.farmId !== undefined && {
+                    farmId: input.farmId,
+                    farm: input.farmName,
+                }),
                 ...(input.length !== undefined && { length: input.length }),
                 ...(input.type !== undefined && { type: input.type }),
                 ...(input.diameterClass !== undefined && { diameterClass: input.diameterClass }),
@@ -80,6 +89,8 @@ export class ReceiptRepository implements IReceiptRepository {
                 ...(input.notes !== undefined && { notes: input.notes }),
                 ...(input.grossWeight !== undefined && { grossWeight: input.grossWeight }),
                 ...(input.tareWeight !== undefined && { tareWeight: input.tareWeight }),
+                ...(input.trailerGrossWeight !== undefined && { trailerGrossWeight: input.trailerGrossWeight }),
+                ...(input.trailerTareWeight !== undefined && { trailerTareWeight: input.trailerTareWeight }),
                 ...(input.invoiceWeight !== undefined && { invoiceWeight: input.invoiceWeight }),
                 ...(input.pricePerTon !== undefined && { pricePerTon: input.pricePerTon }),
             },
@@ -92,6 +103,27 @@ export class ReceiptRepository implements IReceiptRepository {
         await this.prisma.receipt.delete({
             where: {
                 id,
+            },
+        });
+    }
+
+    async unlinkComplementaryInvoice(id: string): Promise<Receipt> {
+        const updated = await this.prisma.receipt.update({
+            where: {
+                id,
+            },
+            data: {
+                complementaryInvoiceId: null,
+            },
+            include: includeComplementaryInvoice,
+        });
+        return updated;
+    }
+
+    async countByComplementaryInvoiceId(complementaryInvoiceId: string): Promise<number> {
+        return this.prisma.receipt.count({
+            where: {
+                complementaryInvoiceId,
             },
         });
     }

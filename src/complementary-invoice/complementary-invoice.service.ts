@@ -1,9 +1,15 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateComplementaryInvoiceDTO } from './dto/create-complementary-invoice.dto';
 import { COMPLEMENTARY_INVOICE_REPOSITORY } from './repositories/complementary-invoice-repository.interface';
 import type { IComplementaryInvoiceRepository } from './repositories/complementary-invoice-repository.interface';
 import { RECEIPT_REPOSITORY } from 'src/receipt/repositories/receipt-repository.interface';
 import type { IReceiptRepository } from 'src/receipt/repositories/receipt-repository.interface';
+import { withNetWeight } from 'src/receipt/receipt.service';
 
 @Injectable()
 export class ComplementaryInvoiceService {
@@ -31,18 +37,16 @@ export class ComplementaryInvoiceService {
       );
     }
 
-    const suppliers = new Set(receipts.map((r) => r.supplier));
-    if (suppliers.size > 1) {
+    const supplierIds = new Set(receipts.map((r) => r.supplierId));
+    if (supplierIds.size > 1) {
       throw new BadRequestException(
         'Todas as pesagens de uma nota fiscal complementar devem ser do mesmo fornecedor.',
       );
     }
 
-    const [supplier] = suppliers;
-
     return this.complementaryInvoiceRepository.createAndLinkReceipts({
       number: dto.number,
-      supplier,
+      supplier: receipts[0].supplier,
       totalWeight: dto.totalWeight,
       receiptIds: uniqueReceiptIds,
     });
@@ -50,5 +54,33 @@ export class ComplementaryInvoiceService {
 
   async findAll() {
     return this.complementaryInvoiceRepository.findAll();
+  }
+
+  async unlinkReceipt(receiptId: string) {
+    const receipt = await this.receiptRepository.findById(receiptId);
+    if (!receipt) {
+      throw new NotFoundException(
+        `Recebimento com id ${receiptId} não encontrado`,
+      );
+    }
+
+    if (!receipt.complementaryInvoiceId) {
+      throw new BadRequestException(
+        'Essa pesagem não está vinculada a nenhuma nota fiscal complementar.',
+      );
+    }
+
+    const complementaryInvoiceId = receipt.complementaryInvoiceId;
+    const updated =
+      await this.receiptRepository.unlinkComplementaryInvoice(receiptId);
+
+    const remaining = await this.receiptRepository.countByComplementaryInvoiceId(
+      complementaryInvoiceId,
+    );
+    if (remaining === 0) {
+      await this.complementaryInvoiceRepository.remove(complementaryInvoiceId);
+    }
+
+    return withNetWeight(updated);
   }
 }
