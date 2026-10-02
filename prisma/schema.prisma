@@ -57,8 +57,9 @@ model Receipt {
   length        Float
   type          ReceiptType
   diameterClass DiameterClass
-  truckPlate    String
+  truckPlate    String?
   trailerPlate  String?
+  weighedUnit   WeighedUnit   @default(TRUCK)
   driver        String
   notes         String?
   grossWeight   Float
@@ -86,6 +87,12 @@ model ComplementaryInvoice {
 enum Role {
   USER
   ADMIN
+}
+
+enum WeighedUnit {
+  TRUCK_AND_TRAILER
+  TRUCK
+  TRAILER
 }
 
 enum ReceiptType{

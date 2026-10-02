@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString } from "class-validator";
-import { DiameterClass, ReceiptType } from "src/generated/prisma/enums";
+import { DiameterClass, ReceiptType, WeighedUnit } from "src/generated/prisma/enums";
 
 export class CreateReceiptsDTO {
     @IsString()
@@ -59,22 +59,35 @@ export class CreateReceiptsDTO {
     })
     diameterClass!: DiameterClass;
 
+    @IsEnum(WeighedUnit)
+    @ApiProperty({
+        description: 'O que foi pesado: TRUCK_AND_TRAILER (cavalo + julieta, mesma classe), TRUCK (só o cavalo) ou TRAILER (só a julieta). Em TRAILER, grossWeight/tareWeight são os pesos da julieta.',
+        enum: WeighedUnit,
+        example: 'TRUCK_AND_TRAILER'
+    })
+    weighedUnit!: WeighedUnit;
+
+    @IsOptional()
     @IsString()
     @IsNotEmpty()
     @ApiProperty({
-        description: 'Placa do cavalo',
-        example: 'ABC1D23'
+        description: 'Placa do cavalo. Obrigatória em TRUCK e TRUCK_AND_TRAILER; opcional em TRAILER.',
+        example: 'ABC1D23',
+        required: false,
+        nullable: true
     })
-    truckPlate!: string;
+    truckPlate?: string | null;
 
-    @IsString()
     @IsOptional()
+    @IsString()
+    @IsNotEmpty()
     @ApiProperty({
-        description: 'Placa da julieta (quando houver bitrem)',
+        description: 'Placa da julieta. Obrigatória em TRAILER e TRUCK_AND_TRAILER.',
         example: 'XYZ9A87',
-        required: false
+        required: false,
+        nullable: true
     })
-    trailerPlate?: string;
+    trailerPlate?: string | null;
 
     @IsString()
     @IsNotEmpty()
@@ -95,7 +108,7 @@ export class CreateReceiptsDTO {
     @IsNumber()
     @IsPositive()
     @ApiProperty({
-        description: 'Peso bruto em kg',
+        description: 'Peso bruto em kg — do cavalo em TRUCK/TRUCK_AND_TRAILER, da julieta em TRAILER',
         example: 32000
     })
     grossWeight!: number;
@@ -103,7 +116,7 @@ export class CreateReceiptsDTO {
     @IsNumber()
     @IsPositive()
     @ApiProperty({
-        description: 'Peso vazio (tara) em kg — do cavalo, quando a julieta é pesada separadamente',
+        description: 'Peso vazio (tara) em kg — do cavalo em TRUCK/TRUCK_AND_TRAILER, da julieta em TRAILER',
         example: 15000
     })
     tareWeight!: number;
@@ -112,7 +125,7 @@ export class CreateReceiptsDTO {
     @IsPositive()
     @IsOptional()
     @ApiProperty({
-        description: 'Peso bruto da julieta em kg, quando pesada separadamente do cavalo. Informe junto com trailerTareWeight.',
+        description: 'Peso bruto da julieta em kg. Só em TRUCK_AND_TRAILER, junto com trailerTareWeight.',
         example: 18000,
         required: false
     })
@@ -122,7 +135,7 @@ export class CreateReceiptsDTO {
     @IsPositive()
     @IsOptional()
     @ApiProperty({
-        description: 'Peso vazio (tara) da julieta em kg, quando pesada separadamente do cavalo. Informe junto com trailerGrossWeight.',
+        description: 'Peso vazio (tara) da julieta em kg. Só em TRUCK_AND_TRAILER, junto com trailerGrossWeight.',
         example: 8000,
         required: false
     })

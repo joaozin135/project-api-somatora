@@ -1,4 +1,4 @@
-import { DiameterClass, ReceiptType } from 'src/generated/prisma/enums';
+import { DiameterClass, ReceiptType, WeighedUnit } from 'src/generated/prisma/enums';
 import { CreateReceiptsDTO } from '../dto/create-receipts.dto';
 import { UpdateReceiptsDTO } from '../dto/update-receipts.dto';
 
@@ -22,8 +22,9 @@ export type Receipt = {
   length: number;
   type: ReceiptType;
   diameterClass: DiameterClass;
-  truckPlate: string;
+  truckPlate: string | null;
   trailerPlate: string | null;
+  weighedUnit: WeighedUnit;
   driver: string;
   notes: string | null;
   grossWeight: number;
@@ -42,10 +43,15 @@ export type CreateReceiptData = Omit<CreateReceiptsDTO, 'farmId' | 'newFarmName'
   farmId: string;
   farmName: string;
 };
-export type UpdateReceiptData = Omit<UpdateReceiptsDTO, 'farmId' | 'newFarmName'> & {
+export type UpdateReceiptData = Omit<
+  UpdateReceiptsDTO,
+  'farmId' | 'newFarmName' | 'trailerGrossWeight' | 'trailerTareWeight'
+> & {
   supplierName?: string;
   farmId?: string;
   farmName?: string;
+  trailerGrossWeight?: number | null;
+  trailerTareWeight?: number | null;
 };
 
 export interface IReceiptRepository {

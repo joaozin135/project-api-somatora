@@ -10,6 +10,7 @@ import type { IReceiptRepository, Receipt } from './repositories/receipt-reposit
 import { UpdateReceiptsDTO } from './dto/update-receipts.dto';
 import { SUPPLIER_REPOSITORY } from 'src/supplier/repositories/supplier-repository.interface';
 import type { ISupplierRepository } from 'src/supplier/repositories/supplier-repository.interface';
+import { WeighedUnit } from 'src/generated/prisma/enums';
 import { FARM_REPOSITORY } from 'src/farm/repositories/farm-repository.interface';
 import type { IFarmRepository, Farm } from 'src/farm/repositories/farm-repository.interface';
 
@@ -24,31 +25,42 @@ export function withNetWeight(receipt: Receipt) {
   };
 }
 
-function validateTrailerWeights(input: {
-  trailerGrossWeight?: number;
-  trailerTareWeight?: number;
+function validateComposition(input: {
+  weighedUnit: WeighedUnit;
+  truckPlate?: string | null;
   trailerPlate?: string | null;
+  trailerGrossWeight?: number | null;
+  trailerTareWeight?: number | null;
 }) {
-  const hasTrailerGross = input.trailerGrossWeight !== undefined;
-  const hasTrailerTare = input.trailerTareWeight !== undefined;
+  const hasTrailerWeights =
+    input.trailerGrossWeight != null || input.trailerTareWeight != null;
 
-  if (hasTrailerGross !== hasTrailerTare) {
-    throw new BadRequestException(
-      'Informe o peso bruto e o peso vazio da julieta juntos, ou nenhum dos dois.',
-    );
+  if (input.weighedUnit !== WeighedUnit.TRAILER && !input.truckPlate) {
+    throw new BadRequestException('Informe a placa do cavalo.');
   }
 
-  if (hasTrailerGross && hasTrailerTare) {
-    if (!input.trailerPlate) {
+  if (input.weighedUnit !== WeighedUnit.TRUCK && !input.trailerPlate) {
+    throw new BadRequestException('Informe a placa da julieta.');
+  }
+
+  if (input.weighedUnit !== WeighedUnit.TRUCK_AND_TRAILER) {
+    if (hasTrailerWeights) {
       throw new BadRequestException(
-        'Informe a placa da julieta para registrar o peso dela separadamente.',
+        'Peso bruto e vazio da julieta só são informados separadamente na pesagem de cavalo + julieta.',
       );
     }
-    if (input.trailerTareWeight! >= input.trailerGrossWeight!) {
-      throw new BadRequestException(
-        'O peso vazio da julieta deve ser menor que o peso bruto da julieta.',
-      );
-    }
+    return;
+  }
+
+  if (input.trailerGrossWeight == null || input.trailerTareWeight == null) {
+    throw new BadRequestException(
+      'Informe o peso bruto e o peso vazio da julieta.',
+    );
+  }
+  if (input.trailerTareWeight >= input.trailerGrossWeight) {
+    throw new BadRequestException(
+      'O peso vazio da julieta deve ser menor que o peso bruto da julieta.',
+    );
   }
 }
 
@@ -136,11 +148,7 @@ export class ReceiptService {
       );
     }
 
-    validateTrailerWeights({
-      trailerGrossWeight: createReceiptDto.trailerGrossWeight,
-      trailerTareWeight: createReceiptDto.trailerTareWeight,
-      trailerPlate: createReceiptDto.trailerPlate,
-    });
+    validateComposition(createReceiptDto);
 
     const supplier = await this.resolveActiveSupplier(
       createReceiptDto.supplierId,
@@ -188,10 +196,21 @@ export class ReceiptService {
       );
     }
 
-    validateTrailerWeights({
-      trailerGrossWeight: updateReceiptDto.trailerGrossWeight ?? existing.trailerGrossWeight ?? undefined,
-      trailerTareWeight: updateReceiptDto.trailerTareWeight ?? existing.trailerTareWeight ?? undefined,
-      trailerPlate: updateReceiptDto.trailerPlate ?? existing.trailerPlate ?? undefined,
+    const pick = <T>(next: T | undefined, current: T) =>
+      next !== undefined ? next : current;
+    const weighedUnit = pick(updateReceiptDto.weighedUnit, existing.weighedUnit);
+    const keepsTrailerWeights = weighedUnit === WeighedUnit.TRUCK_AND_TRAILER;
+
+    validateComposition({
+      weighedUnit,
+      truckPlate: pick(updateReceiptDto.truckPlate, existing.truckPlate),
+      trailerPlate: pick(updateReceiptDto.trailerPlate, existing.trailerPlate),
+      trailerGrossWeight: keepsTrailerWeights
+        ? pick(updateReceiptDto.trailerGrossWeight, existing.trailerGrossWeight)
+        : updateReceiptDto.trailerGrossWeight,
+      trailerTareWeight: keepsTrailerWeights
+        ? pick(updateReceiptDto.trailerTareWeight, existing.trailerTareWeight)
+        : updateReceiptDto.trailerTareWeight,
     });
 
     const isChangingSupplier =
@@ -236,6 +255,10 @@ export class ReceiptService {
 
     const updatedReceipt = await this.receiptRepository.update(id, {
       ...updateReceiptDto,
+      ...(!keepsTrailerWeights && {
+        trailerGrossWeight: null,
+        trailerTareWeight: null,
+      }),
       supplierName,
       farmId,
       farmName,
