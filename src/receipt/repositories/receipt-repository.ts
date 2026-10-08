@@ -13,6 +13,7 @@ export class ReceiptRepository implements IReceiptRepository {
     async create(input: CreateReceiptData): Promise<Receipt> {
         const created = await this.prisma.receipt.create({
             data: {
+                ...(input.createdAt !== undefined && { createdAt: new Date(input.createdAt) }),
                 invoiceNumber: input.invoiceNumber,
                 supplier: input.supplierName,
                 supplierId: input.supplierId,
@@ -72,6 +73,7 @@ export class ReceiptRepository implements IReceiptRepository {
                 id,
             },
             data: {
+                ...(input.createdAt !== undefined && { createdAt: new Date(input.createdAt) }),
                 ...(input.invoiceNumber !== undefined && { invoiceNumber: input.invoiceNumber }),
                 ...(input.supplierId !== undefined && {
                     supplierId: input.supplierId,

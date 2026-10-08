@@ -1,8 +1,17 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString } from "class-validator";
+import { IsDateString, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString } from "class-validator";
 import { DiameterClass, ReceiptType, WeighedUnit } from "src/generated/prisma/enums";
 
 export class CreateReceiptsDTO {
+    @IsDateString()
+    @IsOptional()
+    @ApiProperty({
+        description: 'Data/hora da pesagem (ISO 8601). Permite lançar pesagens retroativas; não pode ser futura. Se omitida, usa o instante do cadastro.',
+        example: '2026-10-07T15:00:00.000Z',
+        required: false
+    })
+    createdAt?: string;
+
     @IsString()
     @IsNotEmpty()
     @ApiProperty({

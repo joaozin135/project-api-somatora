@@ -64,6 +64,14 @@ function validateComposition(input: {
   }
 }
 
+function validateWeighingDate(createdAt?: string) {
+  if (createdAt === undefined) return;
+  // tolerância de 5 min para diferença de relógio entre cliente e servidor
+  if (new Date(createdAt).getTime() > Date.now() + 5 * 60 * 1000) {
+    throw new BadRequestException('A data da pesagem não pode ser futura.');
+  }
+}
+
 function isUniqueConstraintError(error: unknown): boolean {
   return (
     typeof error === 'object' &&
@@ -149,6 +157,7 @@ export class ReceiptService {
     }
 
     validateComposition(createReceiptDto);
+    validateWeighingDate(createReceiptDto.createdAt);
 
     const supplier = await this.resolveActiveSupplier(
       createReceiptDto.supplierId,
@@ -188,7 +197,9 @@ export class ReceiptService {
       );
     }
 
-    const effectiveGrossWeight = updateReceiptDto.grossWeight ?? existing.grossWeight;
+    validateWeighingDate(updateReceiptDto.createdAt);
+
+    const effectiveGrossWeight =updateReceiptDto.grossWeight ?? existing.grossWeight;
     const effectiveTareWeight = updateReceiptDto.tareWeight ?? existing.tareWeight;
     if (effectiveTareWeight >= effectiveGrossWeight) {
       throw new BadRequestException(
