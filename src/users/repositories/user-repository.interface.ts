@@ -1,4 +1,4 @@
-import { User } from "src/generated/prisma/browser";
+import { User } from "src/generated/prisma/client";
 import { CreateUserDTO } from "../dto/create-user.dto";
 import { UpdateUserDTO } from "../dto/update-user.dto";
 
