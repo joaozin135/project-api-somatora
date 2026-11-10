@@ -6,7 +6,7 @@ import { IsEmail,
 } from 'class-validator';
 
 import { ApiProperty } from '@nestjs/swagger';
-import { Role } from 'src/generated/prisma/browser';
+import { Role } from 'src/generated/prisma/enums';
 
 export class CreateUserDTO {
   @IsString({ message: 'Nome é obrigatório' })
